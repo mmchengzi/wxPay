@@ -1,0 +1,6 @@
+wx:
+  appId : gh_90f0791dd88d        #微信支付 公众号ID
+  apiKey:           #密钥
+  mchId:        # 商户号ID
+  notiftUrl: http://1*0.2**.**.*2:80**/wxpay/wxnotify      #微信支付成功回调地址：微信公众平台(mp.weixin.qq.com) --> 微信支付 --> 扫码支付 --> 支付回调URL
+  ufdoderUrl: https://api.mch.weixin.qq.com/pay/unifiedorder      #微信支付官方接口
