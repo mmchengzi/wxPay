@@ -1,6 +1,16 @@
+spring:
+  profiles:
+    active: dev
 wx:
-  appId : gh_90f0791dd88d        #微信支付 公众号ID
-  apiKey:           #密钥
-  mchId:        # 商户号ID
+  appId: gh_90f0791dd88d
+  apiKey: apiKey123
+  mchId: mchId123
+  p12: C:\Users\Administrator\Desktop\p12.txt
   notiftUrl: http://1*0.2**.**.*2:80**/wxpay/wxnotify      #微信支付成功回调地址：微信公众平台(mp.weixin.qq.com) --> 微信支付 --> 扫码支付 --> 支付回调URL
   ufdoderUrl: https://api.mch.weixin.qq.com/pay/unifiedorder      #微信支付官方接口
+  qrCodePath: http://123.207/98.252:8081/wxpay-rest/qrCode/getQRCode/ #二维码的地址
+  closeorder: https://api.mch.weixin.qq.com/pay/closeorder  #关闭订单
+
+serverIp: 127.0.0.1
+server:
+  port: 8083

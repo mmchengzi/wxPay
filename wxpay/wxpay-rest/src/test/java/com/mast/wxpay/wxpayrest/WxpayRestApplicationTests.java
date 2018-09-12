@@ -11,6 +11,7 @@ public class WxpayRestApplicationTests {
 
 	@Test
 	public void contextLoads() {
+
 	}
 
 }

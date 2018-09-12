@@ -15,14 +15,14 @@
     id, no, goodName, price, status, date, createdAt, updatedAt
   </sql>
 
-  <select id="findFirstByNoAndType" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+  <select id="findFirstByNoAndType" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select
     <include refid="Base_Column_List" />
     from order
     where no = #{no,jdbcType=VARCHAR}
   </select>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from order
     where id = #{id,jdbcType=INTEGER}
@@ -32,11 +32,11 @@
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.mast.wxpay.entity.Order" >
-    insert into order (id, no, goodName, 
+    insert into order (id, no, goodName,
       price, status,
       date, createdAt, updatedAt
       )
-    values (#{id,jdbcType=INTEGER}, #{no,jdbcType=VARCHAR}, #{goodname,jdbcType=VARCHAR}, 
+    values (#{id,jdbcType=INTEGER}, #{no,jdbcType=VARCHAR}, #{goodname,jdbcType=VARCHAR},
       #{price,jdbcType=DECIMAL}, #{status,jdbcType=INTEGER},
       #{date,jdbcType=TIMESTAMP}, #{createdat,jdbcType=INTEGER}, #{updatedat,jdbcType=INTEGER}
       )
