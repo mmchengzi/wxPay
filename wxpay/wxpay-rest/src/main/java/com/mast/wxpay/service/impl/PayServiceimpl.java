@@ -304,7 +304,7 @@ public class PayServiceimpl implements WxService {
 			}
 			order.setUpdatedat(new Long(System.currentTimeMillis() / 1000).intValue());
 			order.setStatus(2);
-			orderRepository.insertSelective(order);
+			orderRepository.updateByPrimaryKeySelective(order);
 			return "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
 
 		} catch (Exception e) {
