@@ -108,7 +108,7 @@ public class WxController {
 	@ApiOperation(value = "统一下单查询支付状态", notes = "统一下单查询支付状态")
 	@RequestMapping(value = "status", method = RequestMethod.POST)
 	@ResponseBody
-	public Result orderStatus(@RequestParam("order") String no) {
+	public Result orderStatus(@RequestParam("no") String no) {
 
 		return payService.findPayStatus(no);
 	}

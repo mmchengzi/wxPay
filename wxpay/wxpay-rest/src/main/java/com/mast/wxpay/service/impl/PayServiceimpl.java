@@ -75,6 +75,7 @@ public class PayServiceimpl implements WxService {
 				result.setData(null);
 				result.setMsg("订单未支付");
 				log.info("订单未支付");
+				break;
 			case 2:
 				result.setCode(0);
 				result.setData(null);
@@ -86,11 +87,13 @@ public class PayServiceimpl implements WxService {
 				result.setData(null);
 				result.setMsg("订单已关闭");
 				log.info("订单已关闭");
+				break;
 			default:
 				result.setCode(1);
 				result.setData(null);
 				result.setMsg("未知订单类型");
 				log.info("未知订单类型");
+				break;
 		}
 		return result;
 	}
