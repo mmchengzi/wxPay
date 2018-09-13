@@ -12,13 +12,18 @@ import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import sun.misc.BASE64Decoder;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static sun.security.x509.CertificateAlgorithmId.ALGORITHM;
 
 /**
  * User zjc
@@ -215,9 +220,9 @@ public class PayServiceimpl implements WxService {
 			return result;
 		} catch (Exception e) {
 			e.printStackTrace();
-			result.setMsg("success");
+			result.setMsg(e.getMessage());
 			result.setData(null);
-			result.setCode(0);
+			result.setCode(1);
 			return result;
 		}
 
@@ -348,15 +353,15 @@ public class PayServiceimpl implements WxService {
 				return "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[FAIL]]></return_msg></xml>";
 			}
 
-			if("SUCCESS".equals((String)resultMap.get("result_code"))){
+			if ("SUCCESS".equals((String) resultMap.get("result_code"))) {
 				List<Order> orderlist = orderRepository.getOrder(resultMap.get("out_trade_no"), null, null);
 				if (orderlist == null) {
 					//退款
 					BigDecimal settlement_total_fee = new BigDecimal(resultMap.get("settlement_total_fee"));
-					Result result=	this.refund(resultMap.get("out_trade_no"),settlement_total_fee);
-					if(result!=null &&result.getCode()==0){
+					Result result = this.refund(resultMap.get("out_trade_no"), settlement_total_fee);
+					if (result != null && result.getCode() == 0) {
 						log.info("退款成功");
-					}else {
+					} else {
 						log.warning("退款失败：" + result.getMsg());
 					}
 					log.warning("返回订单没有找到：" + resultMap.get("out_trade_no"));
@@ -369,7 +374,7 @@ public class PayServiceimpl implements WxService {
 				orderRepository.update(order);
 				return "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
 
-			}else{
+			} else {
 				return "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[FAIL]]></return_msg></xml>";
 			}
 

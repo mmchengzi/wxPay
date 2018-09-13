@@ -22,7 +22,6 @@ public interface WxService {
 	//成功回调接口
 	public String success(HttpServletRequest request, HttpServletResponse response);
 
-
 	//订单关闭
 	public Result orderClose( String no);
 }

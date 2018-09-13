@@ -124,11 +124,10 @@ public class WxController {
 	@ApiOperation(value = "退款", notes = "退款")
 	@RequestMapping(value = "refund", method = RequestMethod.POST)
 	@ResponseBody
-	public Result refundPos(@RequestParam(name = "order") String no,
+	public Result refund(@RequestParam(name = "order") String no,
 							@RequestParam(name = "price") BigDecimal price) {
 		return payService.refund(no, price);
 	}
-
 	/**
 	 * 订单关闭
 	 * @param no String 订单号
