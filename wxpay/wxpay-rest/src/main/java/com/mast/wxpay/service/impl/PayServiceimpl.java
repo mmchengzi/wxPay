@@ -195,6 +195,7 @@ public class PayServiceimpl implements WxService {
 			Refund refund = new Refund();
 			refund.setNo(refundNo);
 			refund.setOid(order.getId());
+			refund.setUserid(order.getUserid());
 			refund.setPrice(price);
 			refund.setCreatedat(new Long(System.currentTimeMillis() / 1000).intValue());
 			refund.setUpdatedat(refund.getCreatedat());
@@ -346,19 +347,31 @@ public class PayServiceimpl implements WxService {
 				log.warning("回调成功数据验签失败");
 				return "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[FAIL]]></return_msg></xml>";
 			}
-			List<Order> orderlist = orderRepository.getOrder(resultMap.get("out_trade_no"), null, null);
 
+			if("SUCCESS".equals((String)resultMap.get("result_code"))){
+				List<Order> orderlist = orderRepository.getOrder(resultMap.get("out_trade_no"), null, null);
+				if (orderlist == null) {
+					//退款
+					BigDecimal settlement_total_fee = new BigDecimal(resultMap.get("settlement_total_fee"));
+					Result result=	this.refund(resultMap.get("out_trade_no"),settlement_total_fee);
+					if(result!=null &&result.getCode()==0){
+						log.info("退款成功");
+					}else {
+						log.warning("退款失败：" + result.getMsg());
+					}
+					log.warning("返回订单没有找到：" + resultMap.get("out_trade_no"));
+					log.warning("准备返回微信：[CDATA[FAIL]]");
+					return "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[FAIL]]></return_msg></xml>";
+				}
+				Order order = orderlist.get(0);
+				order.setUpdatedat(new Long(System.currentTimeMillis() / 1000).intValue());
+				order.setStatus(2);
+				orderRepository.update(order);
+				return "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
 
-			if (orderlist == null) {
-				log.warning("返回订单没有找到：" + resultMap.get("out_trade_no"));
-				log.warning("准备返回微信：[CDATA[FAIL]]");
+			}else{
 				return "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[FAIL]]></return_msg></xml>";
 			}
-			Order order = orderlist.get(0);
-			order.setUpdatedat(new Long(System.currentTimeMillis() / 1000).intValue());
-			order.setStatus(2);
-			orderRepository.update(order);
-			return "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
 
 		} catch (Exception e) {
 			e.printStackTrace();
