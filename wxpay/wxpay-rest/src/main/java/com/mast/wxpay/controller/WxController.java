@@ -14,9 +14,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 
 /**
- * @author Administrator
- * @date 2017-7-5
- */
+*User zjc
+*Created with IntelliJ IDEA
+*Created on 2018-09-13 14:53
+*
+*/
 @RestController
 @RequestMapping(value = "wxPay")
 @Log
@@ -26,6 +28,42 @@ public class WxController {
 
 	@Autowired
 	private WxService payService;
+
+	/**
+	 * 退款查询
+	 * @param userid
+	 * @param no
+	 * @param id
+	 * @param request
+	 * @return
+	 */
+	@ApiOperation(value = "退款查询", notes = "退款查询")
+	@RequestMapping(value = "getRefund", method = RequestMethod.POST)
+	@ResponseBody
+	public Result getRefund(@RequestParam(name = "userid") String userid,
+							  @RequestParam(name = "no") String no,
+							  @RequestParam(name = "id") Integer id,
+							@RequestParam(name = "oid") Integer oid,
+							  HttpServletRequest request) {
+		return payService.getRefund( no, id, oid, userid);
+	}
+	/**
+	 * 订单查询
+	 * @param userid
+	 * @param no
+	 * @param id
+	 * @param request
+	 * @return
+	 */
+	@ApiOperation(value = "订单查询", notes = "订单查询")
+	@RequestMapping(value = "getOrder", method = RequestMethod.POST)
+	@ResponseBody
+	public Result getOrder(@RequestParam(name = "userid") String userid,
+						   @RequestParam(name = "no") String no,
+						   @RequestParam(name = "id") Integer id,
+						   HttpServletRequest request) {
+		return payService.getOrder(no,userid, id);
+	}
 
 	/**
 	 * 统一下单
@@ -39,10 +77,11 @@ public class WxController {
 	@ApiOperation(value = "统一下单", notes = "统一下单")
 	@RequestMapping(value = "create", method = RequestMethod.POST)
 	@ResponseBody
-	public Result createOrder(@RequestParam(name = "goodName") String goodName,
+	public Result createOrder(@RequestParam(name = "userid") String userid,
+							  @RequestParam(name = "goodName") String goodName,
 							  @RequestParam(name = "price") BigDecimal price,
 							  HttpServletRequest request) {
-		return payService.createOrder(goodName, price, request);
+		return payService.createOrder(userid,goodName, price, request);
 	}
 
 	/**
@@ -92,7 +131,6 @@ public class WxController {
 
 	/**
 	 * 订单关闭
-	 *
 	 * @param no String 订单号
 	 * @return Result
 	 * @throws Exception Exception

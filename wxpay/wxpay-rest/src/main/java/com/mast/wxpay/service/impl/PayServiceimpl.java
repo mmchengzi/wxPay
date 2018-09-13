@@ -1,11 +1,11 @@
 package com.mast.wxpay.service.impl;
 
 
+import com.mast.wxpay.dao.OrderDao;
+import com.mast.wxpay.dao.RefundDao;
 import com.mast.wxpay.entity.Order;
 import com.mast.wxpay.entity.Refund;
 import com.mast.wxpay.entity.Result;
-import com.mast.wxpay.mapper.OrderMapper;
-import com.mast.wxpay.mapper.RefundMapper;
 import com.mast.wxpay.service.WxService;
 import com.mast.wxpay.util.WxUtil;
 import lombok.extern.java.Log;
@@ -29,10 +29,10 @@ import java.util.*;
 @Log
 public class PayServiceimpl implements WxService {
 	@Autowired
-	private OrderMapper orderRepository;
+	private OrderDao orderRepository;
 
 	@Autowired
-	private RefundMapper refundRepository;
+	private RefundDao refundRepository;
 
 	@Value("${wx.appId}")
 	private String appId;
@@ -50,6 +50,7 @@ public class PayServiceimpl implements WxService {
 	private String qrCodePath;
 	@Value("${wx.closeorder}")
 	private String closeorder;
+
 	/**
 	 * 查询支付成功
 	 *
@@ -60,7 +61,7 @@ public class PayServiceimpl implements WxService {
 	public Result findPayStatus(String no) {
 
 		Result result = new Result();
-		Order order = orderRepository.findFirstByNoAndType(no);
+		List<Order> order = orderRepository.getOrder(no, null, null);
 		if (order == null) {
 			result.setCode(1);
 			result.setData(null);
@@ -68,7 +69,7 @@ public class PayServiceimpl implements WxService {
 			log.info("订单不存在");
 			return result;
 		}
-		switch (order.getStatus()) {
+		switch (order.get(0).getStatus()) {
 			case 1:
 				result.setCode(1);
 				result.setData(null);
@@ -104,7 +105,7 @@ public class PayServiceimpl implements WxService {
 	@Override
 	public Result refund(String no, BigDecimal price) {
 		Result result = new Result();
-		Order order = orderRepository.findFirstByNoAndType(no);
+		List<Order> order = orderRepository.getOrder(no, null, null);
 		if (order == null) {
 
 			result.setCode(1);
@@ -113,17 +114,23 @@ public class PayServiceimpl implements WxService {
 			log.info("订单查找失败");
 			return result;
 		}
-		if (order.getStatus().equals(1) || order.getStatus().equals(3)) {
+		if (order.get(0).getStatus().equals(1) || order.get(0).getStatus().equals(3)) {
 			result.setCode(1);
 			result.setData(null);
 			result.setMsg("订单未支付或已关闭");
 			log.info("订单未支付或已关闭");
 			return result;
 		}
-		BigDecimal sumRefundPrice = refundRepository.sumRefundPriceByOid(order.getId());
-		if (sumRefundPrice != null) {
+		//根据源订单号id 查询是否有退款订单 没有就返回空 有就汇总之前退款订单金额返回
+		List<Refund> refund = refundRepository.getRefund(null, null, order.get(0).getId(), null);
 
-			if (Integer.valueOf(price.compareTo(order.getPrice().subtract(sumRefundPrice))).equals(1)) {
+		BigDecimal sumRefundPrice = null;
+		for (int i = 0; i < refund.size(); i++) {
+			sumRefundPrice = sumRefundPrice.add(refund.get(i).getPrice());
+		}
+
+		if (sumRefundPrice != null) {
+			if (Integer.valueOf(price.compareTo(order.get(0).getPrice().subtract(sumRefundPrice))).equals(1)) {
 				result.setCode(1);
 				result.setData(null);
 				result.setMsg("退款金额大于剩余退款金额");
@@ -132,7 +139,7 @@ public class PayServiceimpl implements WxService {
 			}
 		} else {
 
-			if (Integer.valueOf(price.compareTo(order.getPrice())).equals(1)) {
+			if (Integer.valueOf(price.compareTo(order.get(0).getPrice())).equals(1)) {
 				result.setCode(1);
 				result.setData(null);
 				result.setMsg("退款金额大于订单金额");
@@ -140,7 +147,7 @@ public class PayServiceimpl implements WxService {
 				return result;
 			}
 		}
-		return this.wxRefund(order, price);
+		return this.wxRefund(order.get(0), price);
 
 	}
 
@@ -188,12 +195,15 @@ public class PayServiceimpl implements WxService {
 			refund.setPrice(price);
 			refund.setCreatedat(new Long(System.currentTimeMillis() / 1000).intValue());
 			refund.setUpdatedat(refund.getCreatedat());
-			refundRepository.insertSelective(refund);
-			BigDecimal sumPrice = refundRepository.sumRefundPriceByOid(order.getId());
-
-			if (sumPrice.doubleValue() >= order.getPrice().doubleValue()) {
+			refundRepository.insert(refund);
+			List<Refund> refundlist = refundRepository.getRefund(null, null, order.getId(), null);
+			BigDecimal sumRefundPrice = null;
+			for (int i = 0; i < refundlist.size(); i++) {
+				sumRefundPrice = sumRefundPrice.add(refundlist.get(i).getPrice());
+			}
+			if (sumRefundPrice.doubleValue() >= order.getPrice().doubleValue()) {
 				order.setStatus(3);
-				orderRepository.updateByPrimaryKeySelective(order);
+				orderRepository.update(order);
 			}
 			result.setMsg("success");
 			result.setData(null);
@@ -210,7 +220,7 @@ public class PayServiceimpl implements WxService {
 	}
 
 	@Override
-	public Result createOrder(String goodName, BigDecimal price, HttpServletRequest request) {
+	public Result createOrder(String userid, String goodName, BigDecimal price, HttpServletRequest request) {
 		Result result = new Result();
 		try {
 			SimpleDateFormat dateForMater = new SimpleDateFormat("yyyyMMdd");
@@ -257,15 +267,52 @@ public class PayServiceimpl implements WxService {
 			order.setPrice(price);
 			//订单创建
 			order.setStatus(1);
+			order.setUserid(userid);
 			order.setDate(new Date());
 			order.setCreatedat(new Long(System.currentTimeMillis() / 1000).intValue());
 			order.setUpdatedat(order.getCreatedat());
-			orderRepository.insertSelective(order);
+			orderRepository.insert(order);
 			result.setCode(0);
 			Map<String, String> resMap = new HashMap<>(16);
 			resMap.put("order_no", orderNo);
 			resMap.put("url", qrCodePath + "?code=" + Base64.getEncoder().encodeToString(resultMap.get("code_url").getBytes()));
 			result.setData(resMap);
+			result.setMsg("success");
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.setCode(1);
+			result.setData(null);
+			result.setMsg(e.getMessage());
+			return result;
+		}
+	}
+
+	@Override
+	public Result getOrder(String no, String userid, Integer id) {
+		Result result = new Result();
+		try {
+			List<Order> orders = orderRepository.getOrder(no, userid, id);
+			result.setCode(0);
+			result.setData(orders);
+			result.setMsg("success");
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.setCode(1);
+			result.setData(null);
+			result.setMsg(e.getMessage());
+			return result;
+		}
+	}
+
+	@Override
+	public Result getRefund(String no, Integer id, Integer oid, String userid) {
+		Result result = new Result();
+		try {
+			List<Refund> refund = refundRepository.getRefund(no, id, oid, userid);
+			result.setCode(0);
+			result.setData(refund);
 			result.setMsg("success");
 			return result;
 		} catch (Exception e) {
@@ -296,15 +343,18 @@ public class PayServiceimpl implements WxService {
 				log.warning("回调成功数据验签失败");
 				return "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[FAIL]]></return_msg></xml>";
 			}
-			Order order = orderRepository.findFirstByNoAndType(resultMap.get("out_trade_no"));
-			if (order == null) {
+			List<Order> orderlist = orderRepository.getOrder(resultMap.get("out_trade_no"), null, null);
+
+
+			if (orderlist == null) {
 				log.warning("返回订单没有找到：" + resultMap.get("out_trade_no"));
 				log.warning("准备返回微信：[CDATA[FAIL]]");
 				return "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[FAIL]]></return_msg></xml>";
 			}
+			Order order = orderlist.get(0);
 			order.setUpdatedat(new Long(System.currentTimeMillis() / 1000).intValue());
 			order.setStatus(2);
-			orderRepository.updateByPrimaryKeySelective(order);
+			orderRepository.update(order);
 			return "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
 
 		} catch (Exception e) {
@@ -320,7 +370,8 @@ public class PayServiceimpl implements WxService {
 	public Result orderClose(String no) {
 		Result result = new Result();
 		try {
-			Order order = orderRepository.findFirstByNoAndType(no);
+			List<Order> orderlsit = orderRepository.getOrder(no, null, null);
+			Order order = orderlsit.get(0);
 			if (order == null) {
 				log.warning("订单不存在");
 				result.setMsg("订单不存在");
@@ -343,11 +394,10 @@ public class PayServiceimpl implements WxService {
 			data.put("mch_id", mchId);
 			data.put("out_trade_no", no);
 			data.put("nonce_str", nonceStr);
-			String sendXml = new WxUtil().wxEnStr(data,apiKey);
+			String sendXml = new WxUtil().wxEnStr(data, apiKey);
 
 			Map<String, String> resultMap = new WxUtil().requestWx(sendXml, closeorder, p12, mchId);
 			if ("FAIL".equals(resultMap.get("return_code"))) {
-
 				log.warning("返回错误");
 				result.setMsg(resultMap.get("return_msg"));
 				result.setCode(1);
@@ -362,7 +412,7 @@ public class PayServiceimpl implements WxService {
 				return result;
 			}
 			order.setStatus(3);
-			orderRepository.insertSelective(order);
+			orderRepository.insert(order);
 			result.setMsg("success");
 			result.setCode(0);
 			result.setData(null);

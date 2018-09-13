@@ -14,8 +14,11 @@ public interface WxService {
 	public Result refund(String no, BigDecimal price);
 
 	//创建订单
-	public Result createOrder(String goodName, BigDecimal price, HttpServletRequest request);
-
+	public Result createOrder(String userid,String goodName, BigDecimal price, HttpServletRequest request);
+	//订单查询
+	public Result getOrder(String no,String userid,Integer id);
+	//退款查询
+	public Result getRefund(String no,Integer id,Integer oid,String userid);
 	//成功回调接口
 	public String success(HttpServletRequest request, HttpServletResponse response);
 

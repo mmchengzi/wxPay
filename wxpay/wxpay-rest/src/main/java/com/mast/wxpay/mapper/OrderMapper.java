@@ -3,18 +3,13 @@ package com.mast.wxpay.mapper;
 import com.mast.wxpay.entity.Order;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Map;
+
 @Repository
 public interface OrderMapper {
-    Order findFirstByNoAndType(String no);
-    int deleteByPrimaryKey(Integer id);
-
+    List<Order> getOrder(Map<String,Object> map);
+    int delete(Map<String,Object> map);
     int insert(Order record);
-
-    int insertSelective(Order record);
-
-    Order selectByPrimaryKey(Integer id);
-
-    int updateByPrimaryKeySelective(Order record);
-
-    int updateByPrimaryKey(Order record);
+    int update(Order record);
 }

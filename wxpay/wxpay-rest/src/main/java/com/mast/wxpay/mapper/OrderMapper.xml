@@ -4,6 +4,7 @@
   <resultMap id="BaseResultMap" type="com.mast.wxpay.entity.Order" >
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="no" property="no" jdbcType="VARCHAR" />
+    <result column="userid" property="userid" jdbcType="VARCHAR" />
     <result column="goodName" property="goodname" jdbcType="VARCHAR" />
     <result column="price" property="price" jdbcType="DECIMAL" />
     <result column="status" property="status" jdbcType="INTEGER" />
@@ -12,95 +13,54 @@
     <result column="updatedAt" property="updatedat" jdbcType="INTEGER" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, no, goodName, price, status, date, createdAt, updatedAt
+    id, no, userid,goodName, price, status, date, createdAt, updatedAt
   </sql>
 
-  <select id="findFirstByNoAndType" resultMap="BaseResultMap" parameterType="java.lang.String" >
+  <select id="getOrder" resultMap="BaseResultMap" parameterType="Map" >
     select
     <include refid="Base_Column_List" />
-    from order
-    where no = #{no,jdbcType=VARCHAR}
+    from `order`
+    <where>
+      <if test="no != null">
+        AND  no = #{no,jdbcType=VARCHAR}
+      </if>
+      <if test="userid != null">
+      AND  userid = #{userid,jdbcType=VARCHAR}
+      </if>
+      <if test="id != null ">
+        AND id = #{id,jdbcType=INTEGER}
+      </if>
+    </where>
   </select>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
-    select
-    <include refid="Base_Column_List" />
-    from order
-    where id = #{id,jdbcType=INTEGER}
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
-    delete from order
-    where id = #{id,jdbcType=INTEGER}
+  <delete id="delete" parameterType="Map" >
+    delete from `order`
+    <where>
+      <if test="no != null">
+        AND  no = #{no,jdbcType=VARCHAR}
+      </if>
+      <if test="id != null ">
+        AND  id = #{id,jdbcType=INTEGER}
+      </if>
+    </where>
   </delete>
   <insert id="insert" parameterType="com.mast.wxpay.entity.Order" >
-    insert into order (id, no, goodName,
+    insert into `order` (id, no,userid, goodName,
       price, status,
       date, createdAt, updatedAt
       )
-    values (#{id,jdbcType=INTEGER}, #{no,jdbcType=VARCHAR}, #{goodname,jdbcType=VARCHAR},
+    values (#{id,jdbcType=INTEGER}, #{no,jdbcType=VARCHAR},#{userid,jdbcType=VARCHAR}, #{goodname,jdbcType=VARCHAR},
       #{price,jdbcType=DECIMAL}, #{status,jdbcType=INTEGER},
       #{date,jdbcType=TIMESTAMP}, #{createdat,jdbcType=INTEGER}, #{updatedat,jdbcType=INTEGER}
       )
   </insert>
-  <insert id="insertSelective" parameterType="com.mast.wxpay.entity.Order" >
-    insert into order
-    <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="id != null" >
-        id,
-      </if>
-      <if test="no != null" >
-        no,
-      </if>
-      <if test="goodname != null" >
-        goodName,
-      </if>
-      <if test="price != null" >
-        price,
-      </if>
-      <if test="status != null" >
-        status,
-      </if>
-      <if test="date != null" >
-        date,
-      </if>
-      <if test="createdat != null" >
-        createdAt,
-      </if>
-      <if test="updatedat != null" >
-        updatedAt,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="id != null" >
-        #{id,jdbcType=INTEGER},
-      </if>
-      <if test="no != null" >
-        #{no,jdbcType=VARCHAR},
-      </if>
-      <if test="goodname != null" >
-        #{goodname,jdbcType=VARCHAR},
-      </if>
-      <if test="price != null" >
-        #{price,jdbcType=DECIMAL},
-      </if>
-      <if test="status != null" >
-        #{status,jdbcType=INTEGER},
-      </if>
-      <if test="date != null" >
-        #{date,jdbcType=TIMESTAMP},
-      </if>
-      <if test="createdat != null" >
-        #{createdat,jdbcType=INTEGER},
-      </if>
-      <if test="updatedat != null" >
-        #{updatedat,jdbcType=INTEGER},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.mast.wxpay.entity.Order" >
-    update order
+  <update id="update" parameterType="com.mast.wxpay.entity.Order" >
+    update `order`
     <set >
       <if test="no != null" >
         no = #{no,jdbcType=VARCHAR},
+      </if>
+      <if test="userid != null" >
+        userid = #{userid,jdbcType=VARCHAR},
       </if>
       <if test="goodname != null" >
         goodName = #{goodname,jdbcType=VARCHAR},
@@ -121,17 +81,6 @@
         updatedAt = #{updatedat,jdbcType=INTEGER},
       </if>
     </set>
-    where id = #{id,jdbcType=INTEGER}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.mast.wxpay.entity.Order" >
-    update order
-    set no = #{no,jdbcType=VARCHAR},
-      goodName = #{goodname,jdbcType=VARCHAR},
-      price = #{price,jdbcType=DECIMAL},
-      status = #{status,jdbcType=INTEGER},
-      date = #{date,jdbcType=TIMESTAMP},
-      createdAt = #{createdat,jdbcType=INTEGER},
-      updatedAt = #{updatedat,jdbcType=INTEGER}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>

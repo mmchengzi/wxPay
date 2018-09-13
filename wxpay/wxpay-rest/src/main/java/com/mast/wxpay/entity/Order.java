@@ -10,7 +10,7 @@ public class Order {
     private Integer id;
 
     private String no;
-
+    private String userid;
     private String goodname;
 
     private BigDecimal price;

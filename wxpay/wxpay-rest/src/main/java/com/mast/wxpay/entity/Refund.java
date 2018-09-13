@@ -9,6 +9,7 @@ public class Refund {
     private Integer id;
 
     private Integer oid;
+    private String userid;
 
     private String no;
 

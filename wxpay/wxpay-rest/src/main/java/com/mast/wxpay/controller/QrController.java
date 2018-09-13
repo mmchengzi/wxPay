@@ -20,7 +20,7 @@ import java.util.Base64;
 @RestController
 @Log
 @RequestMapping("/qrCode")
-@Api(value="QrController",description="获取二维码")
+@Api(value="二维码",description="获取二维码")
 public class QrController {
 
     /**
