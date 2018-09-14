@@ -198,6 +198,7 @@ public class PayServiceimpl implements WxService {
 				return result;
 			}
 			Refund refund = new Refund();
+			refund.setId((int)(System.currentTimeMillis()));
 			refund.setNo(refundNo);
 			refund.setOid(order.getId());
 			refund.setUserid(order.getUserid());
@@ -271,6 +272,7 @@ public class PayServiceimpl implements WxService {
 				log.warning("数据验签失败");
 			}
 			Order order = new Order();
+			order.setId((int)(System.currentTimeMillis()));
 			order.setNo(orderNo);
 			order.setGoodname(goodName);
 			order.setPrice(price);
@@ -287,6 +289,7 @@ public class PayServiceimpl implements WxService {
 			resMap.put("url", qrCodePath + "?code=" + Base64.getEncoder().encodeToString(resultMap.get("code_url").getBytes()));
 			result.setData(resMap);
 			result.setMsg("success");
+			log.info("code_url#"+resultMap.get("code_url"));
 			return result;
 		} catch (Exception e) {
 			e.printStackTrace();
