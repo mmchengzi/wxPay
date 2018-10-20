@@ -1,7 +1,6 @@
 package com.mast.wxpay.service;
 
 import com.mast.wxpay.entity.Result;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,9 +15,9 @@ public interface WxService {
 	//创建订单
 	public Result createOrder(String userid,String goodName, BigDecimal price, HttpServletRequest request);
 	//订单查询
-	public Result getOrder(String no,String userid,Integer id);
+	public Result getOrder(String no,String userid,Long id);
 	//退款查询
-	public Result getRefund(String no,Integer id,Integer oid,String userid);
+	public Result getRefund(String no,Long id,Long oid,String userid);
 	//成功回调接口
 	public String success(HttpServletRequest request, HttpServletResponse response);
 

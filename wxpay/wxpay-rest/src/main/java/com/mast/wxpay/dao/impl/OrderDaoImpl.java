@@ -14,10 +14,10 @@ import java.util.Map;
 @Repository
 public class OrderDaoImpl implements OrderDao {
 	@Autowired
-	OrderMapper service;
+	private  OrderMapper service;
 
 	@Override
-	public List<Order> getOrder(String no, String userid,Integer id) {
+	public List<Order> getOrder(String no, String userid,Long id) {
 		Map map = new HashMap();
 		map.put("no", no);
 		map.put("id", id);
@@ -26,7 +26,7 @@ public class OrderDaoImpl implements OrderDao {
 	}
 
 	@Override
-	public int delete(String no, Integer id) {
+	public int delete(String no, Long id) {
 		Map map = new HashMap();
 		map.put("no", no);
 		map.put("id", id);

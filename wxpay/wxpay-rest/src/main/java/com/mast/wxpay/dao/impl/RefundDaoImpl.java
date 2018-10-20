@@ -18,7 +18,7 @@ public class RefundDaoImpl implements RefundDao {
 	RefundMapper service;
 
 	@Override
-	public int delete(String no, Integer id) {
+	public int delete(String no, Long id) {
 		Map map = new HashMap();
 		map.put("no", no);
 		map.put("id", id);
@@ -36,7 +36,7 @@ public class RefundDaoImpl implements RefundDao {
 	}
 
 	@Override
-	public List<Refund> getRefund(String no, Integer id, Integer oid,String userid) {
+	public List<Refund> getRefund(String no, Long id, Long oid,String userid) {
 		Map map = new HashMap();
 		map.put("no", no);
 		map.put("oid", oid);

@@ -1,6 +1,7 @@
 package com.mast.wxpay.service.impl;
 
 
+import com.mast.wxpay.config.SnowflakeIdWorker;
 import com.mast.wxpay.dao.OrderDao;
 import com.mast.wxpay.dao.RefundDao;
 import com.mast.wxpay.entity.Order;
@@ -192,11 +193,12 @@ public class PayServiceimpl implements WxService {
 				result.setCode(1);
 				return result;
 			}
+			SnowflakeIdWorker idWorker = new SnowflakeIdWorker(0, 0);
 			Refund refund = new Refund();
-			refund.setId((int)(System.currentTimeMillis()));
+			refund.setId(idWorker.nextId());
 			refund.setNo(refundNo);
-			refund.setOid(order.getId());
-			refund.setUserid(order.getUserid());
+			refund.setOId(order.getId());
+			refund.setUserId(order.getUserId());
 			refund.setPrice(price);
 			refund.setCreateTime(new Date());
 			refundRepository.insert(refund);
@@ -265,14 +267,15 @@ public class PayServiceimpl implements WxService {
 			if ((new WxUtil().validatorSign(resultMap, apiKey)).equals(false)) {
 				log.warning("数据验签失败");
 			}
+			SnowflakeIdWorker idWorker = new SnowflakeIdWorker(0, 0);
 			Order order = new Order();
-			order.setId((int)(System.currentTimeMillis()));
+			order.setId(idWorker.nextId());
 			order.setNo(orderNo);
-			order.setGoodname(goodName);
+			order.setGoodName(goodName);
 			order.setPrice(price);
 			//订单创建
 			order.setStatus(1);
-			order.setUserid(userid);
+			order.setUserId(userid);
 			order.setCreateTime(new Date());
 			orderRepository.insert(order);
 			result.setCode(0);
@@ -293,7 +296,7 @@ public class PayServiceimpl implements WxService {
 	}
 
 	@Override
-	public Result getOrder(String no, String userid, Integer id) {
+	public Result getOrder(String no, String userid, Long id) {
 		Result result = new Result();
 		try {
 			List<Order> orders = orderRepository.getOrder(no, userid, id);
@@ -311,7 +314,7 @@ public class PayServiceimpl implements WxService {
 	}
 
 	@Override
-	public Result getRefund(String no, Integer id, Integer oid, String userid) {
+	public Result getRefund(String no, Long id, Long oid, String userid) {
 		Result result = new Result();
 		try {
 			List<Refund> refund = refundRepository.getRefund(no, id, oid, userid);
