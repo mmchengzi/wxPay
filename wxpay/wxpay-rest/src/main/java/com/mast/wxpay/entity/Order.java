@@ -9,7 +9,7 @@ import java.util.Date;
 public class Order {
     private Integer id;
 
-    private String no;
+    private String  no;
     private String userid;
     private String goodname;
 
@@ -17,9 +17,8 @@ public class Order {
 
     private Integer status;
 
-    private Date date;
 
-    private Integer createdat;
+    private Date createTime;
 
-    private Integer updatedat;
+    private Date updatedTime;
 }

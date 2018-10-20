@@ -12,18 +12,13 @@ import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import sun.misc.BASE64Decoder;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static sun.security.x509.CertificateAlgorithmId.ALGORITHM;
 
 /**
  * User zjc
@@ -175,7 +170,7 @@ public class PayServiceimpl implements WxService {
 			dataMap.put("appid", appId);
 			dataMap.put("mch_id", mchId);
 			dataMap.put("nonce_str", nonceStr);
-			dataMap.put("out_trade_no", order.getNo());
+			dataMap.put("out_trade_no", order.getNo().toString());
 			dataMap.put("out_refund_no", refundNo);
 			dataMap.put("total_fee", String.valueOf((order.getPrice().multiply(new BigDecimal(100))).intValue()));
 			dataMap.put("refund_fee", goodPrice.toString());
@@ -203,8 +198,7 @@ public class PayServiceimpl implements WxService {
 			refund.setOid(order.getId());
 			refund.setUserid(order.getUserid());
 			refund.setPrice(price);
-			refund.setCreatedat(new Long(System.currentTimeMillis() / 1000).intValue());
-			refund.setUpdatedat(refund.getCreatedat());
+			refund.setCreateTime(new Date());
 			refundRepository.insert(refund);
 			List<Refund> refundlist = refundRepository.getRefund(null, null, order.getId(), null);
 			BigDecimal sumRefundPrice = null;
@@ -279,9 +273,7 @@ public class PayServiceimpl implements WxService {
 			//订单创建
 			order.setStatus(1);
 			order.setUserid(userid);
-			order.setDate(new Date());
-			order.setCreatedat(new Long(System.currentTimeMillis() / 1000).intValue());
-			order.setUpdatedat(order.getCreatedat());
+			order.setCreateTime(new Date());
 			orderRepository.insert(order);
 			result.setCode(0);
 			Map<String, String> resMap = new HashMap<>(16);
@@ -372,7 +364,7 @@ public class PayServiceimpl implements WxService {
 					return "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[FAIL]]></return_msg></xml>";
 				}
 				Order order = orderlist.get(0);
-				order.setUpdatedat(new Long(System.currentTimeMillis() / 1000).intValue());
+				order.setUpdatedTime(new Date());
 				order.setStatus(2);
 				orderRepository.update(order);
 				return "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
