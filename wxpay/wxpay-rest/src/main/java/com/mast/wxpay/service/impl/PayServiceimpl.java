@@ -431,7 +431,7 @@ public class PayServiceimpl implements WxService {
 				return result;
 			}
 			order.setStatus(3);
-			orderRepository.insert(order);
+			orderRepository.update(order);
 			result.setMsg("success");
 			result.setCode(0);
 			result.setData(null);

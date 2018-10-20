@@ -42,8 +42,8 @@ public class WxController {
 	@ResponseBody
 	public Result getRefund(@RequestParam(name = "userid") String userid,
 							  @RequestParam(name = "no") String no,
-							  @RequestParam(name = "id") Integer id,
-							@RequestParam(name = "oid") Integer oid,
+							  @RequestParam(name = "id") Long id,
+							@RequestParam(name = "oid") Long oid,
 							  HttpServletRequest request) {
 		return payService.getRefund( no, id, oid, userid);
 	}
@@ -60,7 +60,7 @@ public class WxController {
 	@ResponseBody
 	public Result getOrder(@RequestParam(name = "userid") String userid,
 						   @RequestParam(name = "no") String no,
-						   @RequestParam(name = "id") Integer id,
+						   @RequestParam(name = "id") Long id,
 						   HttpServletRequest request) {
 		return payService.getOrder(no,userid, id);
 	}
