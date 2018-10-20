@@ -36,12 +36,12 @@ public class RefundDaoImpl implements RefundDao {
 	}
 
 	@Override
-	public List<Refund> getRefund(String no, Long id, Long oid,String userid) {
+	public List<Refund> getRefund(String no, Long id, Long oId,String userId) {
 		Map map = new HashMap();
 		map.put("no", no);
-		map.put("oid", oid);
+		map.put("oId", oId);
 		map.put("id", id);
-		map.put("userid", userid);
+		map.put("userId", userId);
 		return service.getRefund(map);
 	}
 }

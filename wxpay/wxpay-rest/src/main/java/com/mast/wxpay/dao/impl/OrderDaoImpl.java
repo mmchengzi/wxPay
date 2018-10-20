@@ -17,11 +17,11 @@ public class OrderDaoImpl implements OrderDao {
 	private  OrderMapper service;
 
 	@Override
-	public List<Order> getOrder(String no, String userid,Long id) {
+	public List<Order> getOrder(String no, String userId,Long id) {
 		Map map = new HashMap();
 		map.put("no", no);
 		map.put("id", id);
-		map.put("userid", userid);
+		map.put("userId", userId);
 		return service.getOrder(map);
 	}
 

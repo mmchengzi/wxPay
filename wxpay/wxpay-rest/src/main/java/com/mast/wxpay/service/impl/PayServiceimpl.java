@@ -109,49 +109,60 @@ public class PayServiceimpl implements WxService {
 	@Override
 	public Result refund(String no, BigDecimal price) {
 		Result result = new Result();
-		List<Order> order = orderRepository.getOrder(no, null, null);
-		if (order == null) {
+		try {
+			List<Order> order = orderRepository.getOrder(no, null, null);
+			if (order == null) {
 
-			result.setCode(1);
-			result.setData(null);
-			result.setMsg("订单查找失败");
-			log.info("订单查找失败");
-			return result;
-		}
-		if (order.get(0).getStatus().equals(1) || order.get(0).getStatus().equals(3)) {
-			result.setCode(1);
-			result.setData(null);
-			result.setMsg("订单未支付或已关闭");
-			log.info("订单未支付或已关闭");
-			return result;
-		}
-		//根据源订单号id 查询是否有退款订单 没有就返回空 有就汇总之前退款订单金额返回
-		List<Refund> refund = refundRepository.getRefund(null, null, order.get(0).getId(), null);
-
-		BigDecimal sumRefundPrice = null;
-		for (int i = 0; i < refund.size(); i++) {
-			sumRefundPrice = sumRefundPrice.add(refund.get(i).getPrice());
-		}
-
-		if (sumRefundPrice != null) {
-			if (Integer.valueOf(price.compareTo(order.get(0).getPrice().subtract(sumRefundPrice))).equals(1)) {
 				result.setCode(1);
 				result.setData(null);
-				result.setMsg("退款金额大于剩余退款金额");
-				log.info("退款金额大于剩余退款金额");
+				result.setMsg("订单查找失败");
+				log.info("订单查找失败");
 				return result;
 			}
-		} else {
-
-			if (Integer.valueOf(price.compareTo(order.get(0).getPrice())).equals(1)) {
+			if (order.get(0).getStatus().equals(1) || order.get(0).getStatus().equals(3)) {
 				result.setCode(1);
 				result.setData(null);
-				result.setMsg("退款金额大于订单金额");
-				log.info("退款金额大于订单金额");
+				result.setMsg("订单未支付或已关闭");
+				log.info("订单未支付或已关闭");
 				return result;
 			}
+			//根据源订单号id 查询是否有退款订单 没有就返回空 有就汇总之前退款订单金额返回
+			List<Refund> refund = refundRepository.getRefund(null, null, order.get(0).getId(), null);
+
+			BigDecimal sumRefundPrice = new BigDecimal(0);
+			if(refund !=null &&refund.size()>0){
+				for (int i = 0; i < refund.size(); i++) {
+					sumRefundPrice = sumRefundPrice.add(refund.get(i).getPrice());
+				}
+			}
+
+			if (sumRefundPrice != null) {
+				if (Integer.valueOf(price.compareTo(order.get(0).getPrice().subtract(sumRefundPrice))).equals(1)) {
+					result.setCode(1);
+					result.setData(null);
+					result.setMsg("退款金额大于剩余退款金额");
+					log.info("退款金额大于剩余退款金额");
+					return result;
+				}
+			} else {
+
+				if (Integer.valueOf(price.compareTo(order.get(0).getPrice())).equals(1)) {
+					result.setCode(1);
+					result.setData(null);
+					result.setMsg("退款金额大于订单金额");
+					log.info("退款金额大于订单金额");
+					return result;
+				}
+			}
+			return this.wxRefund(order.get(0), price);
+
+		}catch (Exception e){
+			e.printStackTrace();
+			result.setMsg(e.getMessage());
+			result.setData(null);
+			result.setCode(1);
+			return result;
 		}
-		return this.wxRefund(order.get(0), price);
 
 	}
 
@@ -203,9 +214,11 @@ public class PayServiceimpl implements WxService {
 			refund.setCreateTime(new Date());
 			refundRepository.insert(refund);
 			List<Refund> refundlist = refundRepository.getRefund(null, null, order.getId(), null);
-			BigDecimal sumRefundPrice = null;
-			for (int i = 0; i < refundlist.size(); i++) {
-				sumRefundPrice = sumRefundPrice.add(refundlist.get(i).getPrice());
+			BigDecimal sumRefundPrice = new BigDecimal(0);
+			if(refundlist !=null && refundlist.size()>0){
+				for (int i = 0; i < refundlist.size(); i++) {
+					sumRefundPrice = sumRefundPrice.add(refundlist.get(i).getPrice());
+				}
 			}
 			if (sumRefundPrice.doubleValue() >= order.getPrice().doubleValue()) {
 				order.setStatus(3);
